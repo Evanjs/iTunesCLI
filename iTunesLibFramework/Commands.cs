@@ -53,8 +53,8 @@ namespace iTunesLibFramework
 
         public static List<string> SearchSongsByName(string query) =>
         (from IITTrack track in iTunes.LibraryPlaylist.Tracks
-            where track.Name.ToLower().Contains(query)
-            select GetTrackInfo(track)).ToList();
+         where track.Name.ToLower().Contains(query)
+         select GetTrackInfo(track)).ToList();
 
         public static IITPlaylist FirstPlaylistMatchingString(string query)
             => (from IITPlaylist p in
@@ -86,17 +86,9 @@ Database ID: {track.TrackDatabaseID}";
 
         public static string PlayFirstSongMatchingName(string songName)
         {
-            int high, low;
             var searchedTrack = FirstSongMatchingName(songName);
-            GetPIDsFromOtherIds(searchedTrack.sourceID, searchedTrack.playlistID, searchedTrack.trackID,
-                searchedTrack.TrackDatabaseID, out high, out low);
-            var t = iTunes.LibraryPlaylist.Tracks.ItemByPersistentID[high, low];
-            if (t == null)
-            {
-                return $"Could not find song containing string {songName}";
-            }
-            t.Play();
-            return t.TrackToString();
+            searchedTrack?.Play();
+            return searchedTrack.TrackToString();
         }
 
         private static string TrackToString(this IITTrack t)
