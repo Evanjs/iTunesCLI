@@ -13,13 +13,52 @@ namespace iTunesLibFramework
         public static IiTunes iTunes { get; set; } = new iTunesAppClass();
         public static IiTunesAdmin iTunesAdmin { get; set; }
 
-        public static void Play() => iTunes.Play();
-        public static void Pause() => iTunes.Pause();
-        public static void PlayPause() => iTunes.PlayPause();
+        public static string Play()
+        {
+            iTunes.Play();
+            return PlayerState;
+        }
+        public static string Pause()
+        {
+            iTunes.Pause();
+            return PlayerState;
+        }
+
+        public static string PlayPause()
+        {
+            iTunes.PlayPause();
+            return PlayerState;
+        }
+
+        private static string PlayerState
+        {
+            get
+            {
+                switch (iTunes.PlayerState)
+                {
+                    case ITPlayerState.ITPlayerStatePlaying:
+                        return "Now Playing.";
+                    case ITPlayerState.ITPlayerStateStopped:
+                        return "Paused.";
+                    case ITPlayerState.ITPlayerStateFastForward:
+                        return "Fast Forwarding...";
+                    case ITPlayerState.ITPlayerStateRewind:
+                        return "Rewinding...";
+                    default:
+                        return "Cannot determine player status.";
+                }
+            }
+        }
+
         public static List<string> SearchSongsByName(string query) =>
             (from IITTrack track in iTunes.LibraryPlaylist.Tracks
              where track.Name.ToLower().Contains(query)
              select GetTrackInfo(track)).ToList();
+
+        public static IITTrack FirstSongMatchingName(string songNameQuery)
+            => (from IITTrack track in iTunes.LibraryPlaylist.Tracks
+                where track.Name.ToLower().Contains(songNameQuery.ToLower())
+                select track).First();
 
         public static string GetTrackInfo(IITTrack track) => $@"
 Name: {track.Name}
@@ -38,14 +77,32 @@ Database ID: {track.TrackDatabaseID}";
             iTunes.GetITObjectPersistentIDs(refo, out high, out low);
         }
 
+        public static string PlayFirstSongMatchingName(string songName)
+        {
+            int high, low;
+            var searchedTrack = FirstSongMatchingName(songName);
+            GetPIDsFromOtherIds(searchedTrack.sourceID, searchedTrack.playlistID, searchedTrack.trackID, searchedTrack.TrackDatabaseID, out high, out low);
+            var t = iTunes.LibraryPlaylist.Tracks.ItemByPersistentID[high, low];
+            if (t == null)
+            {
+                return $"Could not find song containing string {songName}";
+            }
+            t.Play();
+            return $"Now playing: {t.Name} by {t.Artist} from album {t.Album}";
+        }
+
         public static string PlaySongById(int sourceID, int playlistID, int trackID, int databaseID)
         {
             int high, low;
-            //var track = iTunes.LibrarySource.GetITObjectIDs()
             GetPIDsFromOtherIds(sourceID, playlistID, trackID, databaseID, out high, out low);
-            //iTunes.get;
-            //iTunes.LibraryPlaylist.Tracks.ItemByPersistentID[high, low].Play();
-            var t = iTunes.LibraryPlaylist.Tracks.ItemByPersistentID[high, low];
+            var t = iTunes.LibraryPlaylist.Tracks?.ItemByPersistentID[high, low];
+
+            if (t == null)
+            {
+                return
+                    $"Could not find track with sourceID {sourceID}, playlistID {playlistID}, trackID {trackID}, and databaseID {databaseID}.";
+            }
+
             t.Play();
             return $"Now playing: {t.Name} by {t.Artist} from album {t.Album}";
         }

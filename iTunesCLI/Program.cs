@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Hosting;
-using System.Security.Cryptography.X509Certificates;
-using iTunesLib;
+using Fclp;
 using iTunesLibFramework;
+
 
 namespace iTunesCLI
 {
@@ -12,44 +9,22 @@ namespace iTunesCLI
     {
         static void Main(string[] args)
         {
-            while (true)
-            {
-                Console.WriteLine("Please enter a command.");
-                var c = Console.ReadLine();
+            var p = new FluentCommandLineParser();
+            p.Setup<string>('p').Callback(songName => Commands.PlayFirstSongMatchingName(songName).Write());
+            p.Setup<string>("play").Callback(songName => Commands.Play().Write());
+            p.Setup<string>("pause").Callback(songName => Commands.Pause().Write());
+            p.Setup<string>("playpause").Callback(songName => Commands.PlayPause().Write());
+            p.Setup<string>('s', "psbid").Callback(ids => Commands.PlaySongById(0, 0, 0, 0).Write());
+            p.Setup<string>("ssbn").Callback(x => Commands.Search(x).ForEach(result => result.Write()));
+            p.Parse(args);
+        }
+    }
 
-                var arguments = args.Length == 0 ? c.Split(' ') : args;
-
-                if (arguments.Any(a => a == "play") || c == "play")
-                    Commands.Play();
-                else if (arguments.Any(a => a == "pa") || c == "pa")
-                {
-                    Commands.Pause();
-                }
-                else if (arguments.Any(a => a == "pp") || c == "pp")
-                {
-                    Commands.PlayPause();
-                }
-                else if (arguments.Any(a => a == "psbid" && arguments.Length == 5))
-                {
-                    var message = Commands.PlaySongById(arguments[1].ToInt32(), arguments[2].ToInt32(), arguments[3].ToInt32(), arguments[4].ToInt32());
-                    Console.WriteLine(message);
-                }
-                else if (arguments.Any(a => a == "ssbn" && arguments.Length == 2))
-                {
-                    var query = arguments[1];
-                    var searchResults = Commands.Search(query);
-                    searchResults.ForEach(Console.WriteLine);
-                }
-                else if (arguments.Any(a => a == "quit") || c == "quit")
-                {
-                    return;
-                }
-                else
-                {
-                    Console.WriteLine("Command not found.");
-                }
-
-            }
+    public static class Extensions
+    {
+        public static void Write(this string output)
+        {
+            Console.WriteLine(output);
         }
     }
 }
