@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Fclp;
 using iTunesLibFramework;
 
@@ -17,7 +18,7 @@ namespace iTunesCLI
             p.Setup<string>('p', "play").Callback(message => Commands.Play().Write());
             p.Setup<string>('u', "pause").Callback(message => Commands.Pause().Write());
             p.Setup<string>('l', "playpause").Callback(songName => Commands.PlayPause().Write());
-            p.Setup<string>('i', "playsongbyid").Callback(ids => Commands.PlaySongById(0, 0, 0, 0).Write());
+            p.Setup<List<int>>('i', "playsongbyid").Callback(ids => Commands.PlaySongById(ids[0], ids[1], ids[2], ids[3]).Write());
             p.Setup<string>('f', "searchsongs").Callback(x => Commands.Search(x).ForEach(result => result.Write()));
             p.Parse(args);
             Commands.iTunes = null;
