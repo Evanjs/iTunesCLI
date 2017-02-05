@@ -18,6 +18,7 @@ namespace iTunesLibFramework
             iTunes.Play();
             return PlayerState;
         }
+
         public static string Pause()
         {
             iTunes.Pause();
@@ -51,19 +52,15 @@ namespace iTunesLibFramework
         }
 
         public static List<string> SearchSongsByName(string query) =>
-            (from IITTrack track in iTunes.LibraryPlaylist.Tracks
-             where track.Name.ToLower().Contains(query)
-             select GetTrackInfo(track)).ToList();
+        (from IITTrack track in iTunes.LibraryPlaylist.Tracks
+            where track.Name.ToLower().Contains(query)
+            select GetTrackInfo(track)).ToList();
 
         public static IITPlaylist FirstPlaylistMatchingString(string query)
             => (from IITPlaylist p in
-                    iTunes.LibrarySource.Playlists
+                iTunes.LibrarySource.Playlists
                 where p.Name.ToLower().Contains(query.ToLower())
                 select p).FirstOrDefault();
-        //(from IITPlaylist playlist in
-        //    iTunes.LibrarySource.Playlists
-        //    where playlist.Name.Contains(query)
-        //    select playlist).First();
 
         public static IITTrack FirstSongMatchingName(string songNameQuery)
             => (from IITTrack track in iTunes.LibraryPlaylist.Tracks
@@ -91,7 +88,8 @@ Database ID: {track.TrackDatabaseID}";
         {
             int high, low;
             var searchedTrack = FirstSongMatchingName(songName);
-            GetPIDsFromOtherIds(searchedTrack.sourceID, searchedTrack.playlistID, searchedTrack.trackID, searchedTrack.TrackDatabaseID, out high, out low);
+            GetPIDsFromOtherIds(searchedTrack.sourceID, searchedTrack.playlistID, searchedTrack.trackID,
+                searchedTrack.TrackDatabaseID, out high, out low);
             var t = iTunes.LibraryPlaylist.Tracks.ItemByPersistentID[high, low];
             if (t == null)
             {
@@ -133,6 +131,12 @@ Database ID: {track.TrackDatabaseID}";
             t.Play();
             return $"Now playing: {t.Name} by {t.Artist} from album {t.Album}";
         }
-        public static List<string> Search(string query) => iTunes.LibraryPlaylist.Search(query, ITPlaylistSearchField.ITPlaylistSearchFieldSongNames).Cast<IITTrack>().Select(GetTrackInfo).ToList();
+
+        public static List<string> Search(string query)
+            =>
+                iTunes.LibraryPlaylist.Search(query, ITPlaylistSearchField.ITPlaylistSearchFieldSongNames)
+                    .Cast<IITTrack>()
+                    .Select(GetTrackInfo)
+                    .ToList();
     }
 }
