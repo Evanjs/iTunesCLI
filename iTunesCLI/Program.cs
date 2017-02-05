@@ -10,13 +10,17 @@ namespace iTunesCLI
         static void Main(string[] args)
         {
             var p = new FluentCommandLineParser();
-            p.Setup<string>('p').Callback(songName => Commands.PlayFirstSongMatchingName(songName).Write());
-            p.Setup<string>("play").Callback(songName => Commands.Play().Write());
-            p.Setup<string>("pause").Callback(songName => Commands.Pause().Write());
-            p.Setup<string>("playpause").Callback(songName => Commands.PlayPause().Write());
-            p.Setup<string>('s', "psbid").Callback(ids => Commands.PlaySongById(0, 0, 0, 0).Write());
-            p.Setup<string>("ssbn").Callback(x => Commands.Search(x).ForEach(result => result.Write()));
+            if (args.Length == 0)
+                args = Console.ReadLine()?.Split(' ');
+
+            p.Setup<string>('s', "playfirst").Callback(songName => Commands.PlayFirstSongMatchingName(songName).Write());
+            p.Setup<string>('p', "play").Callback(message => Commands.Play().Write());
+            p.Setup<string>('u', "pause").Callback(message => Commands.Pause().Write());
+            p.Setup<string>('l', "playpause").Callback(songName => Commands.PlayPause().Write());
+            p.Setup<string>('i', "playsongbyid").Callback(ids => Commands.PlaySongById(0, 0, 0, 0).Write());
+            p.Setup<string>('f', "searchsongs").Callback(x => Commands.Search(x).ForEach(result => result.Write()));
             p.Parse(args);
+            Commands.iTunes = null;
         }
     }
 
