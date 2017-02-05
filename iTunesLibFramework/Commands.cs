@@ -27,7 +27,7 @@ namespace iTunesLibFramework
         public static string PlayPause()
         {
             iTunes.PlayPause();
-            return PlayerState;
+            return PlayerState.ToString();
         }
 
         private static string PlayerState
@@ -54,6 +54,16 @@ namespace iTunesLibFramework
             (from IITTrack track in iTunes.LibraryPlaylist.Tracks
              where track.Name.ToLower().Contains(query)
              select GetTrackInfo(track)).ToList();
+
+        public static IITPlaylist FirstPlaylistMatchingString(string query)
+            => (from IITPlaylist p in
+                    iTunes.LibrarySource.Playlists
+                where p.Name.ToLower().Contains(query.ToLower())
+                select p).FirstOrDefault();
+        //(from IITPlaylist playlist in
+        //    iTunes.LibrarySource.Playlists
+        //    where playlist.Name.Contains(query)
+        //    select playlist).First();
 
         public static IITTrack FirstSongMatchingName(string songNameQuery)
             => (from IITTrack track in iTunes.LibraryPlaylist.Tracks
@@ -89,6 +99,23 @@ Database ID: {track.TrackDatabaseID}";
             }
             t.Play();
             return $"Now playing: {t.Name} by {t.Artist} from album {t.Album}";
+        }
+
+        public static string PlayFirstPlaylistMatchingString(string playlistName, bool shuffle)
+        {
+            var searchedPlaylist = FirstPlaylistMatchingString(playlistName);
+
+            if (searchedPlaylist != null)
+            {
+                searchedPlaylist.Shuffle = shuffle;
+                searchedPlaylist.PlayFirstTrack();
+                return $"Now playing playlist: {searchedPlaylist.Name}";
+            }
+            else
+            {
+                return $"Could not find playlist containing string {playlistName}";
+            }
+
         }
 
         public static string PlaySongById(int sourceID, int playlistID, int trackID, int databaseID)

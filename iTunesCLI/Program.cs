@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Fclp;
 using iTunesLibFramework;
 
@@ -13,10 +14,12 @@ namespace iTunesCLI
             var p = new FluentCommandLineParser();
             if (args.Length == 0)
                 args = Console.ReadLine()?.Split(' ');
-
+            bool shuffleRequested = false;
+            p.Setup<bool>('z', "shuffle").Callback(shuffle => shuffleRequested = shuffle).SetDefault(false);
             p.Setup<string>('s', "playfirst").Callback(songName => Commands.PlayFirstSongMatchingName(songName).Write());
             p.Setup<string>('p', "play").Callback(message => Commands.Play().Write());
             p.Setup<string>('u', "pause").Callback(message => Commands.Pause().Write());
+            p.Setup<string>('t', "playlist").Callback(playlist => Commands.PlayFirstPlaylistMatchingString(playlist, shuffleRequested).Write());
             p.Setup<string>('l', "playpause").Callback(songName => Commands.PlayPause().Write());
             p.Setup<List<int>>('i', "playsongbyid").Callback(ids => Commands.PlaySongById(ids[0], ids[1], ids[2], ids[3]).Write());
             p.Setup<string>('f', "searchsongs").Callback(x => Commands.Search(x).ForEach(result => result.Write()));
