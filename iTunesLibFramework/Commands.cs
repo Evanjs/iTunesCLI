@@ -98,6 +98,11 @@ Database ID: {track.TrackDatabaseID}";
                 return $"Could not find song containing string {songName}";
             }
             t.Play();
+            return t.TrackToString();
+        }
+
+        private static string TrackToString(this IITTrack t)
+        {
             return $"Now playing: {t.Name} by {t.Artist} from album {t.Album}";
         }
 
@@ -105,17 +110,12 @@ Database ID: {track.TrackDatabaseID}";
         {
             var searchedPlaylist = FirstPlaylistMatchingString(playlistName);
 
-            if (searchedPlaylist != null)
-            {
-                searchedPlaylist.Shuffle = shuffle;
-                searchedPlaylist.PlayFirstTrack();
-                return $"Now playing playlist: {searchedPlaylist.Name}";
-            }
-            else
-            {
+            if (searchedPlaylist == null)
                 return $"Could not find playlist containing string {playlistName}";
-            }
-
+            searchedPlaylist.Shuffle = shuffle;
+            searchedPlaylist.PlayFirstTrack();
+            return $"Selected playlist: {searchedPlaylist.Name}.\n" +
+                   $"{iTunes.CurrentTrack.TrackToString()}";
         }
 
         public static string PlaySongById(int sourceID, int playlistID, int trackID, int databaseID)
